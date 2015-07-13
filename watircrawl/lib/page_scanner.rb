@@ -7,9 +7,6 @@ require_relative 'work_db'
 require_relative 'url_parse'
 
 module Crawl
-  module SkipList
-    SKIP_URLS_REGEX = ["google.com", "twitter.com", "facebook.com"].map { |url|  /#{url}$/ }
-  end
 
   class PageScanner
     DEBUG = true

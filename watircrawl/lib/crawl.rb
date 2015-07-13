@@ -10,6 +10,10 @@ require_relative 'page_scanner'
 ## module to store what browser to use to crawl the web; we use a real browser so that we can navigate real
 ## javascript
 module Crawl
+  module SkipList
+    SKIP_URLS_REGEX = ["google.com", "twitter.com", "facebook.com"].map { |url|  /#{url}$/ }
+  end
+
   module Browser
     KIND_OF_BROWSER = :firefox
     @@browser = Watir::Browser.new   KIND_OF_BROWSER
@@ -52,6 +56,20 @@ module Crawl
 
     private
 
+    # we want to skip hosts like "google.com", "twitter.com", "facebook.com", in such a case
+    # this will return true, otherwise false
+    def should_skip(url)
+       skip = false
+
+       ::Crawl::SkipList::SKIP_URLS_REGEX.each do |regex_to_skip|
+             skip = true   if url.host =~ regex_to_skip
+       end
+
+       return skip
+    end
+
+
+    # process a single url
     def process_url(url)
       begin
 
@@ -61,8 +79,9 @@ module Crawl
         url = url_kind_normalized[1]  ## normalized i.e. canonical format
 
         unless  [:ref_static_content, :not_valid_url].include?(url_kind)
-          if  ::Crawl::Db::SiteMap.internal_links[url] || ::Crawl::Db::SiteMap.non_internal_links[url]
+          if  ::Crawl::Db::SiteMap.internal_links[url] || ::Crawl::Db::SiteMap.non_internal_links[url] || should_skip(url)
             # already scanned, we could bump the count if needed
+            # if skip just skip!
           else
             # scan it and all its nested pages
             navigate_to_url_and_validate_that_url_was_found(  url )
