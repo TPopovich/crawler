@@ -76,16 +76,13 @@ module Crawl
           url_kind_normalized = is_valid_url(url, from_url)
           url_kind = url_kind_normalized[0]
           url = url_kind_normalized[1]
-          case url_kind
-            when      :ref_static_content
-            then
-            ## the following effectively does a append to our hash of this url entry
+          ## the following effectively does a append to our hash of this url entry
+          ## no matter what the "src" looks like , if it is an <img> tag, its static content!
 
-            entry = Crawl::Db::Entry.new()
-            entry.url = url
-            ::Crawl::Db::SiteMap.static_content_links[url] = entry
+          entry = Crawl::Db::Entry.new()
+          entry.url = url
+          ::Crawl::Db::SiteMap.static_content_links[url] = entry
 
-          end
         end
       end
 
